@@ -1,0 +1,11 @@
+name: "docker-compose v1"
+command: "docker-compose"
+global_opts:
+  - name:  "-f"
+    value: "compose.yaml"
+up:
+  name: "up"
+  opts:
+    - name: "-d"
+down:
+  name: "down"

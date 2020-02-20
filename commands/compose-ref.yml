@@ -1,0 +1,9 @@
+name: "compose-ref"
+command: "compose-ref"
+global_opts:
+  - name:  "-f"
+    value: "compose.yaml"
+up:
+  name: "up"
+down:
+  name: "down"
