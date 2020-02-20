@@ -1,7 +1,11 @@
 .DEFAULT_GOAL := help
 
+.PHONY: images
+images: ## Build the test images
+	docker build server -t test-server
+
 .PHONY: test
-test: ## Run tests
+test: images ## Run tests
 	GOPRIVATE=github.com/compose-spec/compatibility-test-suite go test ./... -v
 
 .PHONY: fmt

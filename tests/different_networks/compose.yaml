@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+  entry:
+    image: test-server
+    build: ../../server
+    networks:
+      - entrynetwork
+    ports:
+      - 8080:8080
+  target:
+    image: test-server
+    build: ../../server
+    networks:
+      - targetnetwork
+
+networks:
+  entrynetwork:
+  targetnetwork:
