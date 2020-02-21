@@ -19,7 +19,7 @@ const (
 func TestSimpleLifecycle(t *testing.T) {
 	h := TestHelper{T: t, testDir: "simple_lifecycle"}
 	h.testUpDown(func(t *testing.T) {
-		time.Sleep(time.Second) // FIXME Test when the up is complete here
+		time.Sleep(time.Second)
 	})
 }
 
@@ -63,9 +63,12 @@ func TestSecretFile(t *testing.T) {
 	})
 }
 
-// Ignored because docker-compose does not support that for now
-func _TestConfigFile(t *testing.T) {
-	h := TestHelper{T: t, testDir: "simple_configfile"}
+func TestConfigFile(t *testing.T) {
+	h := TestHelper{
+		T:            t,
+		testDir:      "simple_configfile",
+		skipCommands: []string{"docker-composeV1"},
+	}
 	h.testUpDown(func(t *testing.T) {
 		actual := getHttpBody(t, volumeUrl+"test_config.txt")
 		assert.Assert(t, actual == "{\"response\":\"MYCONFIG\"}\n")

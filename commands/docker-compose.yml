@@ -1,4 +1,4 @@
-name: "docker-compose v1"
+name: "docker-composeV1"
 command: "docker-compose"
 global_opts:
   - name:  "-f"

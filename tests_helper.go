@@ -130,7 +130,8 @@ func getHttpBody(t *testing.T, address string) string {
 
 type TestHelper struct {
 	*testing.T
-	testDir string
+	testDir      string
+	skipCommands []string
 }
 
 func (h TestHelper) testUpDown(fun func(t *testing.T)) {
@@ -139,6 +140,11 @@ func (h TestHelper) testUpDown(fun func(t *testing.T)) {
 		h.Run(f, func(t *testing.T) {
 			c, err := readConfig(t, filepath.Join(commandsDir, f))
 			assert.NilError(t, err)
+			for _, v := range h.skipCommands {
+				if v == c.Name {
+					t.SkipNow()
+				}
+			}
 			executeUp(t, c, h.testDir)
 			fun(t)
 			executeDown(t, c, h.testDir)
