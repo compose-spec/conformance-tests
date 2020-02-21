@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  entry:
+    image: test-server
+    ports:
+      - 8080:8080
+    secrets:
+      - source: test_secret
+        target: /volumes/test_secret.txt
+
+secrets:
+  test_secret:
+    file: ./test_secret.txt

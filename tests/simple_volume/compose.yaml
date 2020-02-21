@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+  entry:
+    image: test-server
+    ports:
+      - 8080:8080
+    volumes:
+      - ./test_volume.txt:/volumes/test_volume.txt

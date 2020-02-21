@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  entry:
+    image: test-server
+    ports:
+      - 8080:8080
+    configs:
+      - source: test_config
+        target: /volumes/test_config.txt
+
+configs:
+  test_config:
+    file: ./test_config.txt
