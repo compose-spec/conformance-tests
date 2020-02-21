@@ -18,47 +18,47 @@ const (
 
 func TestSimpleLifecycle(t *testing.T) {
 	h := TestHelper{T: t, testDir: "simple_lifecycle"}
-	h.testUpDown(func(t *testing.T) {
+	h.TestUpDown(func(t *testing.T) {
 		time.Sleep(time.Second)
 	})
 }
 
 func TestSimpleNetwork(t *testing.T) {
 	h := TestHelper{T: t, testDir: "simple_network"}
-	h.testUpDown(func(t *testing.T) {
-		actual := getHttpBody(t, pingUrl)
+	h.TestUpDown(func(t *testing.T) {
+		actual := h.getHttpBody(pingUrl)
 		assert.Assert(t, actual == "{\"response\":\"PONG FROM TARGET\"}\n")
 	})
 }
 
 func TestSimpleNetworkFail(t *testing.T) {
 	h := TestHelper{T: t, testDir: "simple_network"}
-	h.testUpDown(func(t *testing.T) {
-		actual := getHttpBody(t, "http://localhost:8080/ping?address=notatarget:8080/ping")
+	h.TestUpDown(func(t *testing.T) {
+		actual := h.getHttpBody("http://localhost:8080/ping?address=notatarget:8080/ping")
 		assert.Assert(t, actual == "{\"response\":\"Could not reach address: notatarget:8080/ping\"}\n")
 	})
 }
 
 func TestDifferentNetworks(t *testing.T) {
 	h := TestHelper{T: t, testDir: "different_networks"}
-	h.testUpDown(func(t *testing.T) {
-		actual := getHttpBody(t, pingUrl)
+	h.TestUpDown(func(t *testing.T) {
+		actual := h.getHttpBody(pingUrl)
 		assert.Assert(t, actual == "{\"response\":\"Could not reach address: target:8080/ping\"}\n")
 	})
 }
 
 func TestVolumeFile(t *testing.T) {
 	h := TestHelper{T: t, testDir: "simple_volume"}
-	h.testUpDown(func(t *testing.T) {
-		actual := getHttpBody(t, volumeUrl+"test_volume.txt")
+	h.TestUpDown(func(t *testing.T) {
+		actual := h.getHttpBody(volumeUrl + "test_volume.txt")
 		assert.Assert(t, actual == "{\"response\":\"MYVOLUME\"}\n")
 	})
 }
 
 func TestSecretFile(t *testing.T) {
 	h := TestHelper{T: t, testDir: "simple_secretfile"}
-	h.testUpDown(func(t *testing.T) {
-		actual := getHttpBody(t, volumeUrl+"test_secret.txt")
+	h.TestUpDown(func(t *testing.T) {
+		actual := h.getHttpBody(volumeUrl + "test_secret.txt")
 		assert.Assert(t, actual == "{\"response\":\"MYSECRET\"}\n")
 	})
 }
@@ -69,8 +69,8 @@ func TestConfigFile(t *testing.T) {
 		testDir:      "simple_configfile",
 		skipCommands: []string{"docker-composeV1"},
 	}
-	h.testUpDown(func(t *testing.T) {
-		actual := getHttpBody(t, volumeUrl+"test_config.txt")
+	h.TestUpDown(func(t *testing.T) {
+		actual := h.getHttpBody(volumeUrl + "test_config.txt")
 		assert.Assert(t, actual == "{\"response\":\"MYCONFIG\"}\n")
 	})
 }

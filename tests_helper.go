@@ -38,12 +38,37 @@ type Opt struct {
 	Value string `yaml:"value,omitempty"`
 }
 
-func readConfig(t *testing.T, configPath string) (*Config, error) {
+type TestHelper struct {
+	*testing.T
+	testDir      string
+	skipCommands []string
+}
+
+func (h TestHelper) TestUpDown(fun func(t *testing.T)) {
+	assert.Assert(h, fun != nil, "Test function cannot be `nil`")
+	for _, f := range h.listFiles(commandsDir) {
+		h.Run(f, func(t *testing.T) {
+			c, err := h.readConfig(filepath.Join(commandsDir, f))
+			assert.NilError(t, err)
+			for _, v := range h.skipCommands {
+				if v == c.Name {
+					t.SkipNow()
+				}
+			}
+			h.executeUp(c)
+			fun(t)
+			h.executeDown(c)
+			h.checkDown()
+		})
+	}
+}
+
+func (h TestHelper) readConfig(configPath string) (*Config, error) {
 	b, err := ioutil.ReadFile(configPath)
-	assert.NilError(t, err)
+	assert.NilError(h.T, err)
 	c := Config{}
 	err = yaml.Unmarshal(b, &c)
-	assert.NilError(t, err)
+	assert.NilError(h.T, err)
 	return &c, nil
 }
 
@@ -65,27 +90,27 @@ func verbWithOptions(c *Config, v Verb) []string {
 	return vOpts
 }
 
-func executeUp(t *testing.T, c *Config, configName string) {
+func (h TestHelper) executeUp(c *Config) {
 	upOpts := verbWithOptions(c, c.Up)
-	execCmd(t, c.Command, configName, upOpts)
+	h.execCmd(c, upOpts)
 }
 
-func executeDown(t *testing.T, c *Config, configName string) {
+func (h TestHelper) executeDown(c *Config) {
 	downOpts := verbWithOptions(c, c.Down)
-	execCmd(t, c.Command, configName, downOpts)
+	h.execCmd(c, downOpts)
 }
 
-func execCmd(t *testing.T, command string, configName string, opts []string) {
-	cmd := icmd.Command(command, opts...)
-	cmd.Dir = filepath.Join("tests", configName)
-	icmd.RunCmd(cmd).Assert(t, icmd.Success)
+func (h TestHelper) execCmd(c *Config, opts []string) {
+	cmd := icmd.Command(c.Command, opts...)
+	cmd.Dir = filepath.Join("tests", h.testDir)
+	icmd.RunCmd(cmd).Assert(h.T, icmd.Success)
 }
 
-func listDirs(t *testing.T, testDir string) []string {
+func (h TestHelper) listDirs(testDir string) []string {
 	currDir, err := os.Getwd()
-	assert.NilError(t, err)
+	assert.NilError(h.T, err)
 	files, err := ioutil.ReadDir(filepath.Join(currDir, testDir))
-	assert.NilError(t, err)
+	assert.NilError(h.T, err)
 	var dirs []string
 	for _, f := range files {
 		if f.IsDir() && !strings.HasPrefix(f.Name(), ".") {
@@ -95,11 +120,11 @@ func listDirs(t *testing.T, testDir string) []string {
 	return dirs
 }
 
-func listFiles(t *testing.T, dir string) []string {
+func (h TestHelper) listFiles(dir string) []string {
 	currDir, err := os.Getwd()
-	assert.NilError(t, err)
+	assert.NilError(h.T, err)
 	content, err := ioutil.ReadDir(filepath.Join(currDir, dir))
-	assert.NilError(t, err)
+	assert.NilError(h.T, err)
 	var configFiles []string
 	for _, f := range content {
 		if !f.IsDir() && strings.HasSuffix(f.Name(), ".yml") {
@@ -109,46 +134,21 @@ func listFiles(t *testing.T, dir string) []string {
 	return configFiles
 }
 
-func checkDown(t *testing.T) {
+func (h TestHelper) checkDown() {
 	cli, err := client.NewEnvClient()
-	assert.NilError(t, err)
+	assert.NilError(h.T, err)
 	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{
 		All: true,
 	})
-	assert.NilError(t, err)
-	assert.Assert(t, len(containers) == 0)
+	assert.NilError(h.T, err)
+	assert.Assert(h.T, len(containers) == 0)
 }
 
-func getHttpBody(t *testing.T, address string) string {
+func (h TestHelper) getHttpBody(address string) string {
 	resp, err := http.Get(address)
-	assert.NilError(t, err)
+	assert.NilError(h.T, err)
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	assert.NilError(t, err)
+	assert.NilError(h.T, err)
 	return string(body)
-}
-
-type TestHelper struct {
-	*testing.T
-	testDir      string
-	skipCommands []string
-}
-
-func (h TestHelper) testUpDown(fun func(t *testing.T)) {
-	assert.Assert(h, fun != nil, "Test function cannot be `nil`")
-	for _, f := range listFiles(h.T, commandsDir) {
-		h.Run(f, func(t *testing.T) {
-			c, err := readConfig(t, filepath.Join(commandsDir, f))
-			assert.NilError(t, err)
-			for _, v := range h.skipCommands {
-				if v == c.Name {
-					t.SkipNow()
-				}
-			}
-			executeUp(t, c, h.testDir)
-			fun(t)
-			executeDown(t, c, h.testDir)
-			checkDown(t)
-		})
-	}
 }
