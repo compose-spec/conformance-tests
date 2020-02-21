@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -17,7 +18,8 @@ import (
 )
 
 const (
-	commandsDir = "commands"
+	commandsDir       = "commands"
+	baseSpecReference = "https://github.com/compose-spec/compose-spec/blob/master/spec.md"
 )
 
 type Config struct {
@@ -42,9 +44,10 @@ type TestHelper struct {
 	*testing.T
 	testDir      string
 	skipCommands []string
+	specRef      string
 }
 
-func (h TestHelper) TestUpDown(fun func(t *testing.T)) {
+func (h TestHelper) TestUpDown(fun func()) {
 	assert.Assert(h, fun != nil, "Test function cannot be `nil`")
 	for _, f := range h.listFiles(commandsDir) {
 		h.Run(f, func(t *testing.T) {
@@ -56,11 +59,30 @@ func (h TestHelper) TestUpDown(fun func(t *testing.T)) {
 				}
 			}
 			h.executeUp(c)
-			fun(t)
+			fun()
 			h.executeDown(c)
 			h.checkDown()
 		})
 	}
+}
+
+func (h TestHelper) Check(expected, actual string) {
+	assert.Check(h.T, expected == actual, h.assertSpecReferenceMessage(expected, actual))
+}
+
+func (h TestHelper) assertSpecReferenceMessage(expected, actual string) string {
+	return fmt.Sprintf("\n- expected: %q\n+ actual: %q\n%s", expected, actual, h.specReferenceMessage())
+}
+
+func (h TestHelper) specReferenceMessage() string {
+	return "Please refer to: " + h.getSpecReference()
+}
+
+func (h TestHelper) getSpecReference() string {
+	if h.specRef != "" {
+		return baseSpecReference + "#" + h.specRef
+	}
+	return baseSpecReference
 }
 
 func (h TestHelper) readConfig(configPath string) (*Config, error) {
