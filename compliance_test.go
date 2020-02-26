@@ -7,11 +7,12 @@ import (
 )
 
 const (
-	pingEntrypoint = "http://localhost:8080/ping"
+	localhost      = "127.0.0.1"
+	pingEntrypoint = "http://" + localhost + ":8080/ping"
 	pingTargetUrl  = "target:8080/ping"
 	pingUrl        = pingEntrypoint + "?address=" + pingTargetUrl
 
-	volumefileEntrypoint = "http://localhost:8080/volumefile"
+	volumefileEntrypoint = "http://" + localhost + ":8080/volumefile"
 	volumeUrl            = volumefileEntrypoint + "?filename="
 )
 
@@ -45,7 +46,7 @@ func TestSimpleNetworkFail(t *testing.T) {
 		specRef: "Networks-top-level-element",
 	}
 	h.TestUpDown(func() {
-		actual := h.getHttpBody("http://localhost:8080/ping?address=notatarget:8080/ping")
+		actual := h.getHttpBody(pingEntrypoint + "?address=notatarget:8080/ping")
 		expected := jsonResponse("Could not reach address: notatarget:8080/ping")
 		h.Check(expected, actual)
 	})
