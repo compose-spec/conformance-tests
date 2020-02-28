@@ -1,5 +1,6 @@
 name: "compose-ref"
 command: "compose-ref"
+ps_command: "docker ps -aq"
 global_opts:
   - name:  "-f"
     value: "compose.yaml"

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -10,8 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 	"gopkg.in/yaml.v2"
 	"gotest.tools/v3/assert"
 	"gotest.tools/v3/icmd"
@@ -25,6 +22,7 @@ const (
 type Config struct {
 	Name       string `yaml:"name"`
 	Command    string `yaml:"command"`
+	PsCommand  string `yaml:"ps_command"`
 	GlobalOpts []Opt  `yaml:"global_opts,omitempty"`
 	Up         Verb   `yaml:"up,omitempty"`
 	Down       Verb   `yaml:"down,omitempty"`
@@ -61,7 +59,7 @@ func (h TestHelper) TestUpDown(fun func()) {
 			h.executeUp(c)
 			fun()
 			h.executeDown(c)
-			h.checkDown()
+			h.checkCleanUp(c)
 		})
 	}
 }
@@ -156,14 +154,17 @@ func (h TestHelper) listFiles(dir string) []string {
 	return configFiles
 }
 
-func (h TestHelper) checkDown() {
-	cli, err := client.NewEnvClient()
-	assert.NilError(h.T, err)
-	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{
-		All: true,
-	})
-	assert.NilError(h.T, err)
-	assert.Assert(h.T, len(containers) == 0)
+func (h TestHelper) checkCleanUp(c *Config) {
+	command := strings.Split(c.PsCommand, " ")
+	cmd := icmd.Command(command[0], command[1:]...)
+	ret := icmd.RunCmd(cmd).Assert(h.T, icmd.Success)
+	out := strings.Trim(ret.Stdout(), "\n")
+	nLines := len(strings.Split(out, "\n")) - 1
+	assert.Check(
+		h.T,
+		0 == nLines,
+		"Problem checking containers' state. "+
+			"There shouldn't be any containers before or after a test.")
 }
 
 func (h TestHelper) getHttpBody(address string) string {
