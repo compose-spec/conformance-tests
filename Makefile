@@ -1,11 +1,16 @@
 .DEFAULT_GOAL := help
 
+.PHONY: check
+check: ## Checks the environment before running any command
+	@[[ $(shell docker ps -aq | wc -l) == 0 ]] || \
+	(echo "You have to remove any containers before running the tests! Please run 'docker rm -f \`docker ps -aq\`' to remove all the existing containers." && exit 1)
+
 .PHONY: images
 images: ## Build the test images
 	docker build server -t test-server
 
 .PHONY: test
-test: images ## Run tests
+test: check images ## Run tests
 	GOPRIVATE=github.com/compose-spec/compatibility-test-suite go test ./... -v
 
 .PHONY: fmt
