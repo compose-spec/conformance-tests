@@ -1,4 +1,4 @@
-module github.com/compose-spec/compliance
+module github.com/compose-spec/compatibility-test-suite
 
 go 1.13
 
