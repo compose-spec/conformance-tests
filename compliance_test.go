@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"testing"
 	"time"
+
+	"gotest.tools/v3/assert"
 )
 
 const (
@@ -14,6 +17,8 @@ const (
 
 	volumefileEntrypoint = "http://" + localhost + ":8080/volumefile"
 	volumeUrl            = volumefileEntrypoint + "?filename="
+
+	udpEntrypoint = "http://" + localhost + ":8080/udp"
 )
 
 func TestSimpleLifecycle(t *testing.T) {
@@ -106,6 +111,28 @@ func TestConfigFile(t *testing.T) {
 	})
 }
 
-func jsonResponse(content string) string {
-	return fmt.Sprintf("{\"response\":\"%s\"}\n", content)
+func TestUdpPort(t *testing.T) {
+	h := TestHelper{
+		T:       t,
+		testDir: "udp_port",
+		specRef: "Networks-top-level-element",
+	}
+	h.TestUpDown(func() {
+		udpValue := "myUdpvalue"
+
+		ServerAddr, err := net.ResolveUDPAddr("udp", localhost+":10001")
+		assert.NilError(h.T, err)
+		LocalAddr, err := net.ResolveUDPAddr("udp", localhost+":0")
+		assert.NilError(h.T, err)
+		Conn, err := net.DialUDP("udp", LocalAddr, ServerAddr)
+		assert.NilError(h.T, err)
+		defer Conn.Close()
+		buf := []byte(fmt.Sprintf("{\"request\":%q}", udpValue))
+		_, err = Conn.Write(buf)
+		assert.NilError(h.T, err)
+
+		actual := h.getHttpBody(udpEntrypoint)
+		expected := jsonResponse(udpValue)
+		h.Check(expected, actual)
+	})
 }

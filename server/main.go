@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,7 +14,10 @@ import (
 	"github.com/labstack/echo"
 )
 
-const defaultPort = 8080
+const (
+	defaultHttpPort = 8080
+	defaultUdpPort  = 10001
+)
 
 func getMapResponse(response string) map[string]string {
 	return map[string]string{
@@ -75,8 +80,37 @@ func fileHandler(c echo.Context) error {
 	)
 }
 
+var udpValue string
+
+func udpServer() {
+	fmt.Println("Running UDP server...")
+	ServerAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf(":%d", defaultUdpPort))
+	ServerConn, err := net.ListenUDP("udp", ServerAddr)
+	checkError(err, true)
+	defer ServerConn.Close()
+
+	var objmap map[string]string
+	buf := make([]byte, 1024)
+	for {
+		n, _, err := ServerConn.ReadFromUDP(buf)
+		checkError(err, true)
+		err = json.Unmarshal(buf[:n], &objmap)
+		checkError(err, true)
+		udpValue = objmap["request"]
+	}
+}
+
+func udpHandler(c echo.Context) error {
+	return c.JSON(
+		http.StatusOK,
+		getMapResponse(udpValue),
+	)
+}
+
 func main() {
-	port := defaultPort
+	go udpServer()
+
+	port := defaultHttpPort
 	httpPort := os.Getenv("HTTP_PORT")
 	if httpPort != "" {
 		port, _ = strconv.Atoi(httpPort)
@@ -90,5 +124,15 @@ func main() {
 	}
 	e.GET("/ping", pingHandler)
 	e.GET("/volumefile", fileHandler)
+	e.GET("/udp", udpHandler)
 	e.Logger.Fatal(e.StartServer(s))
+}
+
+func checkError(err error, exitOnError bool) {
+	if err != nil {
+		fmt.Println("Error: ", err)
+		if exitOnError {
+			os.Exit(0)
+		}
+	}
 }

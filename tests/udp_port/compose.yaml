@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  entry:
+    image: test-server
+    ports:
+      - 8080:8080/tcp
+      - target: 10001
+        published: 10001
+        protocol: udp
+        mode: host

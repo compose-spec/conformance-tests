@@ -175,3 +175,7 @@ func (h TestHelper) getHttpBody(address string) string {
 	assert.NilError(h.T, err)
 	return string(body)
 }
+
+func jsonResponse(content string) string {
+	return fmt.Sprintf("{\"response\":\"%s\"}\n", content)
+}
