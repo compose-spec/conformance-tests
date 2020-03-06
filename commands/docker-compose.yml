@@ -2,6 +2,7 @@ name: "docker-composeV1"
 command: "docker-compose"
 ps_command: "docker ps -aq"
 global_opts:
+  - name: "--compatibility"
   - name:  "-f"
     value: "compose.yaml"
 up:

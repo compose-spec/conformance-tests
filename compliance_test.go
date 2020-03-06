@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"gopkg.in/yaml.v2"
 	"gotest.tools/v3/assert"
 )
 
@@ -19,6 +20,8 @@ const (
 	volumeUrl            = volumefileEntrypoint + "?filename="
 
 	udpEntrypoint = "http://" + localhost + ":8080/udp"
+
+	scaleEntrypoint = "http://" + localhost + ":8080/scalechecker"
 )
 
 func TestSimpleLifecycle(t *testing.T) {
@@ -134,5 +137,21 @@ func TestUdpPort(t *testing.T) {
 		actual := h.getHttpBody(udpEntrypoint)
 		expected := jsonResponse(udpValue)
 		h.Check(expected, actual)
+	})
+}
+
+func TestScaling(t *testing.T) {
+	h := TestHelper{
+		T:            t,
+		testDir:      "scaling",
+		skipCommands: []string{"compose-ref"},
+		specRef:      "Networks-top-level-element",
+	}
+	h.TestUpDown(func() {
+		actual := h.getHttpBody(scaleEntrypoint)
+		responseArray := Response{}
+		err := yaml.Unmarshal([]byte(actual), &responseArray)
+		assert.NilError(h.T, err)
+		h.Check(responseArray.Response, "3")
 	})
 }

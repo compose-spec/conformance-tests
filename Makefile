@@ -8,6 +8,7 @@ check: ## Checks the environment before running any command
 .PHONY: images
 images: ## Build the test images
 	docker build server -t test-server
+	docker build client -t test-client
 
 .PHONY: test
 test: check images ## Run tests

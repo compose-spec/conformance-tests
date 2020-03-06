@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  server:
+    image: test-server
+    build: ../../server
+    ports:
+      - 8080:8080
+  client:
+    image: test-client
+    build: ../../client
+    deploy:
+      replicas: 3

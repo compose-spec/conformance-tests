@@ -45,6 +45,10 @@ type TestHelper struct {
 	specRef      string
 }
 
+type Response struct {
+	Response string `yaml:"response"`
+}
+
 func (h TestHelper) TestUpDown(fun func()) {
 	assert.Assert(h, fun != nil, "Test function cannot be `nil`")
 	for _, f := range h.listFiles(commandsDir) {

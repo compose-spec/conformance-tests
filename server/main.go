@@ -107,6 +107,45 @@ func udpHandler(c echo.Context) error {
 	)
 }
 
+var scaleValues []string
+
+type ScaleValue struct {
+	Value string `json:"value"`
+}
+
+func scaleCheckHandler(c echo.Context) error {
+	s := new(ScaleValue)
+	if err := c.Bind(s); err != nil {
+		c.Error(err)
+		return err
+	}
+	if s.Value != "" && !containsString(scaleValues, s.Value) {
+		scaleValues = append(scaleValues, s.Value)
+	}
+	return c.JSON(
+		http.StatusOK,
+		getMapResponse(fmt.Sprintf("%d", len(scaleValues))),
+	)
+}
+
+func containsString(ss []string, s string) bool {
+	for _, v := range ss {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+func checkError(err error, exitOnError bool) {
+	if err != nil {
+		fmt.Println("Error: ", err)
+		if exitOnError {
+			os.Exit(0)
+		}
+	}
+}
+
 func main() {
 	go udpServer()
 
@@ -125,14 +164,6 @@ func main() {
 	e.GET("/ping", pingHandler)
 	e.GET("/volumefile", fileHandler)
 	e.GET("/udp", udpHandler)
+	e.GET("/scalechecker", scaleCheckHandler)
 	e.Logger.Fatal(e.StartServer(s))
-}
-
-func checkError(err error, exitOnError bool) {
-	if err != nil {
-		fmt.Println("Error: ", err)
-		if exitOnError {
-			os.Exit(0)
-		}
-	}
 }
