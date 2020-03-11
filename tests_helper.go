@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"gopkg.in/yaml.v2"
 	"gotest.tools/v3/assert"
@@ -15,8 +16,9 @@ import (
 )
 
 const (
-	commandsDir       = "commands"
-	baseSpecReference = "https://github.com/compose-spec/compose-spec/blob/master/spec.md"
+	commandsDir           = "commands"
+	baseSpecReference     = "https://github.com/compose-spec/compose-spec/blob/master/spec.md"
+	defaultHealthCheckUrl = "http://127.0.0.1:8080/ping"
 )
 
 type Config struct {
@@ -61,10 +63,21 @@ func (h TestHelper) TestUpDown(fun func()) {
 				}
 			}
 			h.executeUp(c)
+			h.waitHttpReady(defaultHealthCheckUrl, 5*time.Second)
 			fun()
 			h.executeDown(c)
 			h.checkCleanUp(c)
 		})
+	}
+}
+
+func (h TestHelper) waitHttpReady(url string, timeout time.Duration) {
+	limit := time.Now().Add(timeout)
+	for limit.After(time.Now()) {
+		resp, err := http.Get(url)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			return
+		}
 	}
 }
 

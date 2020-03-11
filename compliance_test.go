@@ -133,7 +133,7 @@ func TestUdpPort(t *testing.T) {
 		buf := []byte(fmt.Sprintf("{\"request\":%q}", udpValue))
 		_, err = Conn.Write(buf)
 		assert.NilError(h.T, err)
-
+		time.Sleep(time.Second) // Wait for the registration
 		actual := h.getHttpBody(udpEntrypoint)
 		expected := jsonResponse(udpValue)
 		h.Check(expected, actual)
@@ -148,10 +148,11 @@ func TestScaling(t *testing.T) {
 		specRef:      "Networks-top-level-element",
 	}
 	h.TestUpDown(func() {
+		time.Sleep(2 * time.Second) // Wait so the clients can register
 		actual := h.getHttpBody(scaleEntrypoint)
 		responseArray := Response{}
 		err := yaml.Unmarshal([]byte(actual), &responseArray)
 		assert.NilError(h.T, err)
-		h.Check(responseArray.Response, "3")
+		h.Check("3", responseArray.Response)
 	})
 }
