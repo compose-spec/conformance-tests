@@ -85,6 +85,10 @@ func (h TestHelper) Check(expected, actual string) {
 	assert.Check(h.T, expected == actual, h.assertSpecReferenceMessage(expected, actual))
 }
 
+func (h TestHelper) NilError(e error) {
+	assert.Check(h.T, e == nil, h.assertSpecReferenceMessage("", fmt.Sprintf("%q", e)))
+}
+
 func (h TestHelper) assertSpecReferenceMessage(expected, actual string) string {
 	return fmt.Sprintf("\n- expected: %q\n+ actual: %q\n%s", expected, actual, h.specReferenceMessage())
 }
@@ -102,10 +106,10 @@ func (h TestHelper) getSpecReference() string {
 
 func (h TestHelper) readConfig(configPath string) (*Config, error) {
 	b, err := ioutil.ReadFile(configPath)
-	assert.NilError(h.T, err)
+	h.NilError(err)
 	c := Config{}
 	err = yaml.Unmarshal(b, &c)
-	assert.NilError(h.T, err)
+	h.NilError(err)
 	return &c, nil
 }
 
@@ -145,9 +149,9 @@ func (h TestHelper) execCmd(c *Config, opts []string) {
 
 func (h TestHelper) listDirs(testDir string) []string {
 	currDir, err := os.Getwd()
-	assert.NilError(h.T, err)
+	h.NilError(err)
 	files, err := ioutil.ReadDir(filepath.Join(currDir, testDir))
-	assert.NilError(h.T, err)
+	h.NilError(err)
 	var dirs []string
 	for _, f := range files {
 		if f.IsDir() && !strings.HasPrefix(f.Name(), ".") {
@@ -159,9 +163,9 @@ func (h TestHelper) listDirs(testDir string) []string {
 
 func (h TestHelper) listFiles(dir string) []string {
 	currDir, err := os.Getwd()
-	assert.NilError(h.T, err)
+	h.NilError(err)
 	content, err := ioutil.ReadDir(filepath.Join(currDir, dir))
-	assert.NilError(h.T, err)
+	h.NilError(err)
 	var configFiles []string
 	for _, f := range content {
 		if !f.IsDir() && strings.HasSuffix(f.Name(), ".yml") {
@@ -186,10 +190,10 @@ func (h TestHelper) checkCleanUp(c *Config) {
 
 func (h TestHelper) getHttpBody(address string) string {
 	resp, err := http.Get(address)
-	assert.NilError(h.T, err)
+	h.NilError(err)
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	assert.NilError(h.T, err)
+	h.NilError(err)
 	return string(body)
 }
 

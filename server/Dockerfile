@@ -1,4 +1,4 @@
-FROM golang:1.13.3 AS dev
+FROM golang:1.14.0 AS dev
 WORKDIR /
 COPY main.go /
 RUN go mod init github.com/compose-spec/compatibility-test-suite/server

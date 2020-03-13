@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"gopkg.in/yaml.v2"
-	"gotest.tools/v3/assert"
 )
 
 const (
@@ -124,15 +123,15 @@ func TestUdpPort(t *testing.T) {
 		udpValue := "myUdpvalue"
 
 		ServerAddr, err := net.ResolveUDPAddr("udp", localhost+":10001")
-		assert.NilError(h.T, err)
+		h.NilError(err)
 		LocalAddr, err := net.ResolveUDPAddr("udp", localhost+":0")
-		assert.NilError(h.T, err)
+		h.NilError(err)
 		Conn, err := net.DialUDP("udp", LocalAddr, ServerAddr)
-		assert.NilError(h.T, err)
+		h.NilError(err)
 		defer Conn.Close()
 		buf := []byte(fmt.Sprintf("{\"request\":%q}", udpValue))
 		_, err = Conn.Write(buf)
-		assert.NilError(h.T, err)
+		h.NilError(err)
 		time.Sleep(time.Second) // Wait for the registration
 		actual := h.getHttpBody(udpEntrypoint)
 		expected := jsonResponse(udpValue)
@@ -152,7 +151,7 @@ func TestScaling(t *testing.T) {
 		actual := h.getHttpBody(scaleEntrypoint)
 		responseArray := Response{}
 		err := yaml.Unmarshal([]byte(actual), &responseArray)
-		assert.NilError(h.T, err)
+		h.NilError(err)
 		h.Check("3", responseArray.Response)
 	})
 }
