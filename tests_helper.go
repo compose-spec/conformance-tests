@@ -18,7 +18,7 @@ import (
 const (
 	commandsDir           = "commands"
 	baseSpecReference     = "https://github.com/compose-spec/compose-spec/blob/master/spec.md"
-	defaultHealthCheckUrl = "http://127.0.0.1:8080/ping"
+	defaultHealthCheckURL = "http://127.0.0.1:8080/ping"
 )
 
 type Config struct {
@@ -63,7 +63,7 @@ func (h TestHelper) TestUpDown(fun func()) {
 				}
 			}
 			h.executeUp(c)
-			h.waitHttpReady(defaultHealthCheckUrl, 5*time.Second)
+			h.waitHTTPReady(defaultHealthCheckURL, 5*time.Second)
 			fun()
 			h.executeDown(c)
 			h.checkCleanUp(c)
@@ -71,7 +71,7 @@ func (h TestHelper) TestUpDown(fun func()) {
 	}
 }
 
-func (h TestHelper) waitHttpReady(url string, timeout time.Duration) {
+func (h TestHelper) waitHTTPReady(url string, timeout time.Duration) {
 	limit := time.Now().Add(timeout)
 	for limit.After(time.Now()) {
 		resp, err := http.Get(url)
@@ -188,7 +188,7 @@ func (h TestHelper) checkCleanUp(c *Config) {
 			"There shouldn't be any containers before or after a test.")
 }
 
-func (h TestHelper) getHttpBody(address string) string {
+func (h TestHelper) getHTTPBody(address string) string {
 	resp, err := http.Get(address)
 	h.NilError(err)
 	defer resp.Body.Close()

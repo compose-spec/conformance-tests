@@ -12,11 +12,11 @@ import (
 const (
 	localhost      = "127.0.0.1"
 	pingEntrypoint = "http://" + localhost + ":8080/ping"
-	pingTargetUrl  = "target:8080/ping"
-	pingUrl        = pingEntrypoint + "?address=" + pingTargetUrl
+	pingTargetURL  = "target:8080/ping"
+	pingURL        = pingEntrypoint + "?address=" + pingTargetURL
 
 	volumefileEntrypoint = "http://" + localhost + ":8080/volumefile"
-	volumeUrl            = volumefileEntrypoint + "?filename="
+	volumeURL            = volumefileEntrypoint + "?filename="
 
 	udpEntrypoint = "http://" + localhost + ":8080/udp"
 
@@ -40,7 +40,7 @@ func TestSimpleNetwork(t *testing.T) {
 		specRef: "Networks-top-level-element",
 	}
 	h.TestUpDown(func() {
-		actual := h.getHttpBody(pingUrl)
+		actual := h.getHTTPBody(pingURL)
 		expected := jsonResponse("PONG FROM TARGET")
 		h.Check(expected, actual)
 	})
@@ -53,7 +53,7 @@ func TestSimpleNetworkFail(t *testing.T) {
 		specRef: "Networks-top-level-element",
 	}
 	h.TestUpDown(func() {
-		actual := h.getHttpBody(pingEntrypoint + "?address=notatarget:8080/ping")
+		actual := h.getHTTPBody(pingEntrypoint + "?address=notatarget:8080/ping")
 		expected := jsonResponse("Could not reach address: notatarget:8080/ping")
 		h.Check(expected, actual)
 	})
@@ -66,7 +66,7 @@ func TestDifferentNetworks(t *testing.T) {
 		specRef: "Networks-top-level-element",
 	}
 	h.TestUpDown(func() {
-		actual := h.getHttpBody(pingUrl)
+		actual := h.getHTTPBody(pingURL)
 		expected := jsonResponse("Could not reach address: target:8080/ping")
 		h.Check(expected, actual)
 	})
@@ -79,7 +79,7 @@ func TestVolumeFile(t *testing.T) {
 		specRef: "volumes-top-level-element",
 	}
 	h.TestUpDown(func() {
-		actual := h.getHttpBody(volumeUrl + "test_volume.txt")
+		actual := h.getHTTPBody(volumeURL + "test_volume.txt")
 		expected := jsonResponse("MYVOLUME")
 		h.Check(expected, actual)
 
@@ -93,7 +93,7 @@ func TestSecretFile(t *testing.T) {
 		specRef: "secrets-top-level-element",
 	}
 	h.TestUpDown(func() {
-		actual := h.getHttpBody(volumeUrl + "test_secret.txt")
+		actual := h.getHTTPBody(volumeURL + "test_secret.txt")
 		expected := jsonResponse("MYSECRET")
 		h.Check(expected, actual)
 	})
@@ -107,7 +107,7 @@ func TestConfigFile(t *testing.T) {
 		specRef:      "configs-top-level-element",
 	}
 	h.TestUpDown(func() {
-		actual := h.getHttpBody(volumeUrl + "test_config.txt")
+		actual := h.getHTTPBody(volumeURL + "test_config.txt")
 		expected := jsonResponse("MYCONFIG")
 		h.Check(expected, actual)
 	})
@@ -133,7 +133,7 @@ func TestUdpPort(t *testing.T) {
 		_, err = Conn.Write(buf)
 		h.NilError(err)
 		time.Sleep(time.Second) // Wait for the registration
-		actual := h.getHttpBody(udpEntrypoint)
+		actual := h.getHTTPBody(udpEntrypoint)
 		expected := jsonResponse(udpValue)
 		h.Check(expected, actual)
 	})
@@ -148,7 +148,7 @@ func TestScaling(t *testing.T) {
 	}
 	h.TestUpDown(func() {
 		time.Sleep(2 * time.Second) // Wait so the clients can register
-		actual := h.getHttpBody(scaleEntrypoint)
+		actual := h.getHTTPBody(scaleEntrypoint)
 		responseArray := Response{}
 		err := yaml.Unmarshal([]byte(actual), &responseArray)
 		h.NilError(err)
