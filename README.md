@@ -1,4 +1,5 @@
 # Compose specification conformance test suite
+![CI](https://github.com/compose-spec/conformance-tests/workflows/CI/badge.svg)
 
 This repository contains a test suite for testing Compose implementations to
 ensure that they correctly implement the Compose specification. The current
