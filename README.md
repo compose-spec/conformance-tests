@@ -1,4 +1,4 @@
-# Compose specification compliance test suite
+# Compose specification conformance test suite
 
 This repository contains a test suite for testing Compose implementations to
 ensure that they correctly implement the Compose specification. The current
@@ -14,8 +14,10 @@ which uses the Docker Engine.
 ### Prerequisites
 
 * [Docker](https://docs.docker.com/install/)
+* [Go 1.13 or later](https://golang.org)
 * [compose-ref](https://github.com/compose-spec/compose-ref) in your PATH
-* Ensure that you have no running containers (see [issue](https://github.com/compose-spec/compatibility-test-suite/issues/5))
+* Ensure that you have no running containers (see
+  [issue](https://github.com/compose-spec/compatibility-test-suite/issues/5))
 
 ### Running the tests
 

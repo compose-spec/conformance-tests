@@ -12,12 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-FROM golang:1.14 AS dev
-WORKDIR /go/src
-COPY . .
-RUN go mod init github.com/compose-spec/conformance-tests/client
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /client .
+FROM golang:1.14
 
-FROM scratch AS run
-COPY --from=dev client /
-ENTRYPOINT ["/client"]
+WORKDIR /go/src
+RUN go mod init github.com/compose-spec/conformance-tests
+
+ARG GOLANGCILINT_VERSION=v1.23.8
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin ${GOLANGCILINT_VERSION}
+RUN go get -u github.com/kunalkushwaha/ltag
+
+COPY . /go/src
