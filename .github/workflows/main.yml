@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - '*'
+  pull_request:
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Lint code
+      run: DOCKER_BUILDKIT=1 make lint
+
+    - name: Check code licenses
+      run: DOCKER_BUILDKIT=1 make check-license
