@@ -1,4 +1,6 @@
-#   Copyright 2020 The Compose Specification Authors.
+#!/usr/bin/env bash
+
+#   Copyright The Compose Specification Authors.
 
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -12,12 +14,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-FROM golang:1.14 AS dev
-WORKDIR /go/src
-COPY . .
-RUN go mod init github.com/compose-spec/conformance-tests/client
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /client .
 
-FROM scratch AS run
-COPY --from=dev client /
-ENTRYPOINT ["/client"]
+set -eu -o pipefail
+
+if ! command -v ltag; then
+    >&2 echo "ERROR: ltag not found. Install with:"
+    >&2 echo "    go get -u github.com/kunalkushwaha/ltag"
+    exit 1
+fi
+
+BASEPATH="${1-}"
+
+ltag -t "${BASEPATH}scripts/validate/template" --excludes "validate" --check -v
