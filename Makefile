@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 PACKAGE=github.com/compose-spec/conformance-tests
-IMAGE_PREFIX=compose-spec/conformance-tests-
+IMAGE_PREFIX=composespec/conformance-tests-
 
 .DEFAULT_GOAL := help
 

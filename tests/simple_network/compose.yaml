@@ -2,15 +2,13 @@ version: '3.7'
 
 services:
   entry:
-    image: test-server
-    build: ../../server
+    image: composespec/conformance-tests-server
     networks:
       - mynetwork
     ports:
       - 8080:8080
   target:
-    image: test-server
-    build: ../../server
+    image: composespec/conformance-tests-server
     networks:
       - mynetwork
 
