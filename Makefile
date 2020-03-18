@@ -49,6 +49,10 @@ lint: build-validate-image
 check-license: build-validate-image
 	docker run --rm $(IMAGE_PREFIX)validate bash -c "./scripts/validate/fileheader"
 
+.PHONY: check-vendor
+check-vendor: build-validate-image
+	docker run --rm $(IMAGE_PREFIX)validate bash -c "./scripts/validate/vendor"
+
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
