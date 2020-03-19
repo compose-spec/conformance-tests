@@ -15,10 +15,10 @@
 FROM golang:1.14
 
 WORKDIR /go/src
-RUN go mod init github.com/compose-spec/conformance-tests
 
-ARG GOLANGCILINT_VERSION=v1.23.8
+ARG GOLANGCILINT_VERSION=v1.24.0
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin ${GOLANGCILINT_VERSION}
-RUN go get -u github.com/kunalkushwaha/ltag
+RUN go get -v -u github.com/kunalkushwaha/ltag && rm -rf /go/src/github.com/kunalkushwaha
 
-COPY . /go/src
+ENV GOFLAGS=-mod=vendor
+COPY . .

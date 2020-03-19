@@ -12,10 +12,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+.DEFAULT_GOAL := help
+
 PACKAGE=github.com/compose-spec/conformance-tests
 IMAGE_PREFIX=composespec/conformance-tests-
 
-.DEFAULT_GOAL := help
+GOFLAGS=-mod=vendor
 
 .PHONY: check
 check: ## Checks the environment before running any command
@@ -24,12 +26,12 @@ check: ## Checks the environment before running any command
 
 .PHONY: images
 images: ## Build the test images
-	docker build server -t $(IMAGE_PREFIX)server
-	docker build client -t $(IMAGE_PREFIX)client
+	docker build . -f server/Dockerfile -t $(IMAGE_PREFIX)server
+	docker build . -f client/Dockerfile -t $(IMAGE_PREFIX)client
 
 .PHONY: test
 test: check images ## Run tests
-	GOPRIVATE=$(PACKAGE) go test ./... -v
+	GOPRIVATE=$(PACKAGE) GOFLAGS=$(GOFLAGS) go test ./... -v
 
 .PHONY: fmt
 fmt: ## Format go files
@@ -47,8 +49,9 @@ lint: build-validate-image
 check-license: build-validate-image
 	docker run --rm $(IMAGE_PREFIX)validate bash -c "./scripts/validate/fileheader"
 
-.PHONY: validate
-validate: lint check-license
+.PHONY: check-vendor
+check-vendor: build-validate-image
+	docker run --rm $(IMAGE_PREFIX)validate bash -c "./scripts/validate/vendor"
 
 .PHONY: help
 help:
